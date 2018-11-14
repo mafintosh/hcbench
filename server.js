@@ -1,4 +1,4 @@
-const noise = require('../..')
+const noise = require('noise-peer')
 const network = require('@hyperswarm/network')
 const jsonStream = require('duplex-json-stream')
 const hypercore = require('hypercore')

@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@hyperswarm/network": "0.0.4",
+    "duplex-json-stream": "^1.0.1",
+    "hypercore": "^6.21.0",
+    "hypercore-protocol": "^6.7.1",
+    "noise-peer": "^1.0.0",
+    "pump": "^3.0.0"
+  }
+}

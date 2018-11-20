@@ -12,40 +12,39 @@ console.log(server.publicKey.toString('hex'))
 const swarm = network()
 const hyperswarm = network()
 const feeds = new Map()
+const feed = hypercore(`./remote/test`)
 
-swarm.on('connection', function (stream) {
-  const encryptedStream = noise(stream, false, {
-    pattern: 'XK',
-    staticKeyPair: server,
-    onstatickey: function (remoteKey, done) {
-      console.log('new client key:', remoteKey)
-      done()
-    }
-  })
+feed.ready((err) => {
 
-  encryptedStream.on('error', (err) => {
-    console.error(err)
-  })
+  swarm.on('connection', function (stream) {
+    const encryptedStream = noise(stream, false, {
+      pattern: 'XK',
+      staticKeyPair: server,
+      onstatickey: function (remoteKey, done) {
+        console.log('new client key:', remoteKey)
+        done()
+      }
+    })
 
-  encryptedStream.once('readable', function () {
-    var id = encryptedStream.read()
+    encryptedStream.on('error', (err) => {
+      console.error(err)
+    })
 
-    if (!id.equals(Buffer.from('my-id'))) {
-      encryptedStream.end(JSON.stringify({
-        error: true,
-        message: 'Auth failed. Goodbye'
-      }))
+    encryptedStream.once('readable', function () {
+      var id = encryptedStream.read()
 
-      return
-    }
+      if (!id.equals(Buffer.from('my-id'))) {
+        encryptedStream.end(JSON.stringify({
+          error: true,
+          message: 'Auth failed. Goodbye'
+        }))
 
-    console.log(id)
-    // do something with id
+        return
+      }
 
-    const feed = hypercore(`./remote/test`)
-    feed.ready((err) => {
-      if (encryptedStream.destroyed) return
-      if (err) return encryptedStream.destroy(err)
+      console.log(id)
+      // do something with id
+
 
       encryptedStream.write(JSON.stringify({
         key: feed.key.toString('hex')
@@ -62,7 +61,6 @@ swarm.on('connection', function (stream) {
     })
   })
 })
-
 swarm.join(server.publicKey, {
   announce: true,
   lookup: false

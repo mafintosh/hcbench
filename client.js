@@ -12,7 +12,8 @@ const publicKey = Buffer.from(serverTopic, 'hex')
 const feeds = new Map()
 const client = noise.keygen()
 
-swarm.on('connection', function (stream) {
+swarm.on('connection', function (stream, info) {
+  console.log(info)
   const encryptedStream = noise(stream, true, {
     pattern: 'XK',
     staticKeyPair: client,
@@ -26,7 +27,9 @@ swarm.on('connection', function (stream) {
   encryptedStream.write(Buffer.from('my-id'))
 
   encryptedStream.once('readable', function () {
-    var hello = JSON.parse(encryptedStream.read().toString())
+    var msg = encryptedStream.read().toString()
+    var hello = JSON.parse(msg)
+
     if (hello.error) {
       console.log(hello.message)
       process.exit(1)
